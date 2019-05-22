@@ -15,7 +15,32 @@ class ViewController: UIViewController {
     @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var topImageView: UIImageView!
     var personsArr: [NSManagedObject] = []
+    let rest = RestManager()
 
+    
+    func createUser() {
+        guard let url = URL(string: "http://mage23new.newsoftdemo.info/rest/V1/adminapp/order_list/") else { return }
+        
+        rest.requestHttpHeaders.add(value: "application/json", forKey: "Content-Type")
+        rest.httpBodyParameters.add(value: "1", forKey: "store_id")
+        rest.httpBodyParameters.add(value: "admin", forKey: "username")
+        rest.httpBodyParameters.add(value: "iOS", forKey: "device_type")
+        rest.httpBodyParameters.add(value: "desc", forKey: "id_sort")
+        rest.httpBodyParameters.add(value: "10", forKey: "limit")
+        rest.httpBodyParameters.add(value: "1", forKey: "page")
+        rest.httpBodyParameters.add(value: "", forKey: "price_sort")
+        rest.httpBodyParameters.add(value: "cSNcr_hIZ2E:APA91bFOmubnupEbLc-UfV2yLBIdBvgc_RV4QHmPhcGSFHjZSxdQPrDhFSfT_2BhPd0530XGB6TCgmui56eXi9tIKT0oh8GaKgyDxePvIxVAIR-hyJm-5JtdHFFjhr9f51mdQBzdV25U", forKey: "device_token")
+        
+        rest.makeRequest(toURL: url, withHttpMethod: .post) { (results) in
+            guard let response = results.response else { return }
+            if response.httpStatusCode == 201 {
+                guard let data = results.data else { return }
+                let decoder = JSONDecoder()
+               // guard let jobUser = try? decoder.decode(JobUser.self, from: data) else { return }
+               // print(jobUser.description)
+            }
+        }
+    }
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
@@ -25,15 +50,36 @@ class ViewController: UIViewController {
         //self.createSpinnerView()
         self.authenticateUserUsingTouchId()
         
-        let imageUrl = "https://www.jpl.nasa.gov/spaceimages/images/largesize/PIA05982_hires.jpg"
+        //self.createUser()
+       // return
+        let imageUrl = "http://mage23new.newsoftdemo.info/rest/V1/adminapp/order_list/"//"https://www.jpl.nasa.gov/spaceimages/images/largesize/PIA05982_hires.jpg"
+        UtilityClass.sharedInstance.requestForUserDataWith(["store_id" : "1","device_token":"cSNcr_hIZ2E:APA91bFOmubnupEbLc-UfV2yLBIdBvgc_RV4QHmPhcGSFHjZSxdQPrDhFSfT_2BhPd0530XGB6TCgmui56eXi9tIKT0oh8GaKgyDxePvIxVAIR-hyJm-5JtdHFFjhr9f51mdQBzdV25U","username":"admin","device_type":"iOS","id_sort":"desc","limit":"10","page":"1","price_sort":""], url: imageUrl) { (data, error) in
+            print(data)
+            do {
+                let decoded = try JSONSerialization.jsonObject(with: data, options: [])
+                // here "decoded" is of type `Any`, decoded from JSON data
+                if let dictFromJSON = decoded as? [[String:AnyObject]] {
+                    print(dictFromJSON)
+
+                }
+
+            }
+            catch {
+                
+            }
+            
+                
+                // you can now cast it with the right type
+                // use dictFromJSON
+            }
         
-       // UtilityClass.sharedInstance.requestGetFor(reqUrl: imageUrl) { (data, error) in
-           // DispatchQueue.main.async {
-                
-                //self.topImageView.downloadImage(urlString: imageUrl)
-                
-           // }
-       // }
+//        UtilityClass.sharedInstance.requestGetFor(reqUrl: imageUrl, viewLoader: self.view, viewContLoader: self) { (data, error) in
+//            DispatchQueue.main.async {
+//
+//                self.topImageView.downloadImage(urlString: imageUrl)
+//
+//            }
+//        }
     }
     fileprivate func authenticateUserUsingTouchId() {
         let context = LAContext()
@@ -167,10 +213,8 @@ extension ViewController: UITableViewDelegate {
     
     func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
         let imageUrl = "https://placehold.it/120x120&text=image0\(indexPath.row)"//"https://www.jpl.nasa.gov/spaceimages/images/largesize/PIA05982_hires.jpg"//
-        DispatchQueue.main.async {
-            cell.imageView?.downloadImage(urlString: imageUrl)
-
-        }
+        cell.imageView?.downloadImage(urlString: imageUrl)
+        
     }
     
 }

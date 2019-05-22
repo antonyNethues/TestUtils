@@ -17,7 +17,9 @@ extension UIImageView {
         image = nil
         
         if let imageFromCache = imageCache.object(forKey: urlString as AnyObject) as? UIImage {
-            self.image = imageFromCache
+            //DispatchQueue.main.async {
+                self.image = imageFromCache
+            //}
             return
         }
         let loaderObj = MethodList()
@@ -60,8 +62,34 @@ class UtilityClass: NSObject {
         }
         task.resume()
     }
-    func requestForUserDataWith(_ parameters: [String: String], completionHandler: (_ result: [String: Any], _ error: Error) -> Void){
+    func requestForUserDataWith(_ parameters: [String: String],url:String, completionHandler: @escaping (_ data : Data,_ error : Error) -> Void){
         //.. Code process
+        var urlReq = URLRequest(url: URL(string: url)!)
+        urlReq.httpMethod = "POST"
+        urlReq.setValue("application/json", forHTTPHeaderField: "Content-Type")//  // the request is JSON
+
+        do {
+            urlReq.httpBody = try JSONSerialization.data(withJSONObject: parameters, options: [.prettyPrinted, .sortedKeys])
+        }
+        catch  {
+            print(error.localizedDescription)
+
+        }
+        let task = URLSession.shared.dataTask(with: urlReq) { (data2, response, error2) in
+            if error2 == nil {
+                if data2 != nil {
+                    // DispatchQueue.main.async {
+                    
+                    completionHandler(data2 ?? Data(), error2 ?? NSError() as Error)
+                    
+                    //self.topImageView.image = UIImage(data: data!)
+                    
+                    // }
+                }
+            }
+        }
+       task.resume()
+        
     }
     
     
